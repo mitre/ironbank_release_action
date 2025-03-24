@@ -1,12 +1,15 @@
 name: Indirectly lint action.yml
 
+on:
+  workflow_dispatch: # do not ever run this workflow
+
 jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Pretend to invoke the composite action
-        uses: .
+        uses: mitre/ironbank_release_action@main
         with:
           name: Heimdall
           version: 2.11.5
