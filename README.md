@@ -1,7 +1,7 @@
 # ironbank_release_action
 GitHub Action for automating releases on to [Iron Bank](https://p1.dso.mil/ironbank)
 
-TODO: Inputs, outputs, example, and security warnings
+TODO: Inputs, outputs, example, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
 ## Input and Output Arguments
 ### Input
 #### `command_string` (Required)

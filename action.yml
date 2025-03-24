@@ -1,0 +1,146 @@
+name: 'Release to Iron Bank'
+description: 'Automatically generate an issue and merge request containing version update changes against an Iron Bank repository hosted on repo1.dso.mil'
+branding:
+  icon: 'git-pull-request'
+  color: 'grey-dark'
+inputs:
+  name:
+    description: "The name of the application to be updated, e.g., Heimdall; this string will be used in git branch names so ensure that the provided string is compatible with git's reference naming requirements such as by making sure there are no spaces or periods: https://git-scm.com/docs/git-check-ref-format"
+    required: true
+  version:
+    description: "The semver version number of the application to be released, e.g., 1.2.3; this string will be normalized by converting periods to hyphens for use in git branch names but otherwise the user must ensure that the provided string is compatible with git's reference naming requirements"
+    required: true
+  working_directory_path:
+    description: 'The path to where the Iron Bank repo should be cloned'
+    required: true
+    default: '../tmp_ironbank_workspace'
+  ironbank_pat:
+    description: 'A GitLab personal access token (PAT) for the specified user who has access to the Iron Bank project - ensure that this is a GitHub repo or org secret so that it is not leaked in the logs: https://docs.gitlab.com/user/profile/personal_access_tokens/#create-a-personal-access-token https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions'
+    required: true
+  ironbank_username:
+    description: 'The GitLab username for the user who has access to the Iron Bank project and whose PAT is being supplied, e.g., amann'
+    required: true
+  ironbank_project_id:
+    description: 'The GitLab project id for your Iron Bank project, e.g., 5450: https://docs.gitlab.com/user/project/working_with_projects/#access-a-project-by-using-the-project-id'
+    required: true
+  ironbank_project_clone_url:
+    description: "The clone url for your Iron Bank project without the 'https' protocol in front, e.g., repo1.dso.mil/dsop/mitre/security-automation-framework/heimdall2.git"
+    required: true
+  git_commit_author_name:
+    description: "The commit author's name for the update being pushed to Iron Bank, e.g., Automated Heimdall Release"
+    required: true
+    default: 'Automated Release'
+  git_commit_author_email:
+    description: "The commit author's email for the update being pushed to Iron Bank, e.g., saf@mitre.org"
+    required: true
+  issue_labels:
+    description: 'A comma separated list of labels that will be applied to the issue filed on Iron Bank'
+    required: true
+    default: 'Status::Review'
+  target_branch:
+    description: "The branch that the merge request will be targetting, e.g., 'development', which is usually the default branch on Iron Bank; if no or an empty input is provided, then the target branch will be the repository's default branch"
+    required: false
+  draft:
+    description: 'Whether or not to mark the merge request as a draft; if no or an empty input is provided, then the merge request will not be marked as a draft'
+    required: false
+  update_commands:
+    description: 'The bash script that will be evaluated in order to update all appropriate values within the Iron Bank repo; WARNING: only allow trusted content to be placed here, see the security concerns section of the README'
+    required: true
+outputs:
+  issue_id:
+    description: 'Id for the generated issue'
+    value: ${{ steps.issue.outputs.issue_id }}
+  mr_id:
+    description: 'Id for the generated merge request'
+    value: ${{ steps.mr.outputs.mr_id }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        [[ "${{ inputs.name }}" ]] || { echo '"name" input is empty'; exit 1; }
+        [[ "${{ inputs.version }}" ]] || { echo '"version" input is empty'; exit 1; }
+        [[ "${{ inputs.working_directory_path }}" ]] || { echo '"working_directory_path" input is empty'; exit 1; }
+        [[ "${{ inputs.ironbank_pat }}" ]] || { echo '"ironbank_pat" input is empty'; exit 1; }
+        [[ "${{ inputs.ironbank_username }}" ]] || { echo '"ironbank_username" input is empty'; exit 1; }
+        [[ "${{ inputs.ironbank_project_id }}" ]] || { echo '"ironbank_project_id" input is empty'; exit 1; }
+        [[ "${{ inputs.ironbank_project_clone_url }}" ]] || { echo '"ironbank_project_clone_url" input is empty'; exit 1; }
+        [[ "${{ inputs.git_commit_author_name }}" ]] || { echo '"git_commit_author_name" input is empty'; exit 1; }
+        [[ "${{ inputs.git_commit_author_email }}" ]] || { echo '"git_commit_author_email" input is empty'; exit 1; }
+        [[ "${{ inputs.issue_labels }}" ]] || { echo '"issue_labels" input is empty'; exit 1; }
+        [[ "${{ inputs.update_commands }}" ]] || { echo '"update_commands" input is empty'; exit 1; }
+    - name: Convert periods to hyphens in version string for use in areas like generating the branch name
+      shell: bash
+      run: |
+        version="$(echo ${{ inputs.version }} | sed 's/\./-/g')"
+        git check-ref-format --branch "$version"
+        echo "version_hyphenated=$version" >> $GITHUB_ENV
+    - name: Define merge request title draft prefix
+      id: draft
+      shell: bash
+      run: |
+        if [[ "${{ inputs.draft }}" ]]; then
+          echo "draft_status='Draft: '" >> $GITHUB_ENV
+        else
+          echo "draft_status=''" >> $GITHUB_ENV
+        fi
+    - name: Define target branch
+      id: branch
+      shell: bash
+      run: |
+        if [[ "${{ inputs.target_branch }}" ]]; then
+          git check-ref-format --branch "${{ inputs.target_branch }}"
+          echo "target_branch=${{ inputs.target_branch }}" >> $GITHUB_ENV
+        else
+          branch=$(curl --header "PRIVATE-TOKEN: ${{ inputs.ironbank_pat }}" "https://repo1.dso.mil/api/v4/projects/${{ inputs.ironbank_project_id }}" | jq -r ".default_branch")
+          echo "target_branch=$branch" >> $GITHUB_ENV
+        fi
+    - name: Create working directory
+      shell: bash
+      run: mkdir -p "${{ inputs.working_directory_path }}"
+    - name: Clone Iron Bank repository
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: git clone "https://${{ inputs.ironbank_project_clone_url }}" .
+    - name: Create branch
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: git switch -c "${{ env.version_hyphenated }}"
+    - name: Update repository to reflect the new version of the software that is being released
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: |
+        echo "${{ inputs.update_commands }}"
+        eval "${{ inputs.update_commands }}"
+    - name: Commit changes to the repository
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: |
+        git add .
+        git diff --staged
+        git -c "user.name=${{ inputs.git_commit_author_name }}" -c "user.email=${{ inputs.git_commit_author_email }}" commit -s -m "Updating ${{ inputs.name }} to ${{ inputs.version }}"
+    - name: Create branch
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: git switch -c "${{ env.version_hyphenated }}"
+    - name: Create issue
+      id: issue
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: |
+        issue=$(curl -X POST --header "PRIVATE-TOKEN: ${{ inputs.ironbank_pat }}" --header "Content-Type: application/json" --data '{"title": "Update ${{ inputs.name }} to ${{ inputs.version }}", "labels": "${{ inputs.issue_labels }}"}' "https://repo1.dso.mil/api/v4/projects/${{ inputs.ironbank_project_id }}/issues" | jq ".iid")
+        echo "issue_id=$issue" >> $GITHUB_OUTPUT
+    - name: Push branch
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: |
+        git check-ref-format --branch "${{ steps.issue.outputs.issue_id}}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
+        git push 'https://${{ inputs.ironbank_username }}:{{ inputs.ironbank_pat}}@${{ inputs.ironbank_project_clone_url }}' "${{ env.version_hyphenated }}":"${{ steps.issue.outputs.issue_id}}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
+    - name: Create merge request
+      id: mr
+      shell: bash
+      working-directory: ${{ inputs.working_directory_path }}
+      run: |
+        mr=$(curl -X POST --header "PRIVATE-TOKEN: ${{ inputs.ironbank_pat }}" --header "Content-Type: application/json" --data '{"allow_collaboration": true, "squash": true, "remove_source_branch": true, "source_branch": "${{ steps.issue.outputs.issue_id}}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}", "target_branch": "${{ env.target_branch }}", "title": "${{ env.draft_status  }}Resolve \"Update ${{ inputs.name }} to ${{ inputs.version }}\"", "description": "Related to #${{ steps.issue.outputs.issue_id }}"}' "https://repo1.dso.mil/api/v4/projects/${{ inputs.ironbank_project_id }}/merge_requests" | jq ".iid")
+        echo "mr_id=$mr" >> $GITHUB_OUTPUT
