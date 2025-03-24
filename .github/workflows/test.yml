@@ -1,0 +1,20 @@
+name: Indirectly lint action.yml
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pretend to invoke the composite action
+        uses: .
+        with:
+          name: Heimdall
+          version: 2.11.5
+          ironbank_pat: asdffdsa
+          ironbank_username: amann
+          ironbank_project_id: 5450
+          ironbank_project_clone_url: repo1.dso.mil/dsop/mitre/security-automation-framework/heimdall2.git
+          git_commit_author_email: amann@mitre.org
+          draft: true
+          update_commands: |
+            ls
