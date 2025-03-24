@@ -2,7 +2,7 @@ name: 'Release to Iron Bank'
 description: 'Automatically generate an issue and merge request containing version update changes against an Iron Bank repository hosted on repo1.dso.mil'
 branding:
   icon: 'git-pull-request'
-  color: 'grey-dark'
+  color: 'gray-dark'
 inputs:
   name:
     description: "The name of the application to be updated, e.g., Heimdall; this string will be used in git branch names so ensure that the provided string is compatible with git's reference naming requirements such as by making sure there are no spaces or periods: https://git-scm.com/docs/git-check-ref-format"
