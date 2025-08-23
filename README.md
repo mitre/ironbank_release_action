@@ -1,7 +1,7 @@
 # ironbank_release_action
 GitHub Action for automating releases on to [Iron Bank](https://p1.dso.mil/ironbank)
 
-TODO: header talking about closure concept, example, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
+TODO: header talking about closure concept, header talking about build/push docker container somewhere as a necessary prior step, example, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs - unsure if still needed now that the ironbank certs have propagated a bit but maybe just add it as a reminder that it might be necessary to do?, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
 
 ## Input and Output Arguments
 ### Input
@@ -121,7 +121,9 @@ Id for the generated GitLab merge request on Iron Bank.
 
 ## Secrets
 
-This action does not use any GitHub secrets. 
+At minimum, the following variable should be treated as a secret and not used in plain text within your workflow(s):
+
+  * `ironbank_pat`
 
 ## Example
 
@@ -148,7 +150,7 @@ jobs:
           path: asff_sample_hdf.json
 ```
 
-For more examples, check out [this workflow](https://github.com/mitre/saf_action/blob/main/.github/workflows/example-usages.yml).
+For more examples, check out these workflows: [SAF CLI release]() and [SAF CLI mainline]().
 
 ## Contributing, Issues and Support
 
