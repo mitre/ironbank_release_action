@@ -5,10 +5,10 @@ branding:
   color: 'gray-dark'
 inputs:
   name:
-    description: "The name of the application to be updated, e.g., Heimdall; this string will be used in git branch names so ensure that the provided string is compatible with git's reference naming requirements such as by making sure there are no spaces or periods: https://git-scm.com/docs/git-check-ref-format"
+    description: "The name of the application to be updated; this string will be used in git branch names so ensure that the provided string is compatible with git's reference naming requirements such as by making sure there are no spaces or periods: https://git-scm.com/docs/git-check-ref-format"
     required: true
   version:
-    description: "The semver version number of the application to be released, e.g., 1.2.3; this string will be normalized by converting periods to hyphens for use in git branch names but otherwise the user must ensure that the provided string is compatible with git's reference naming requirements"
+    description: "The semver version number of the application to be released; this string will be normalized by converting periods to hyphens for use in git branch names but otherwise the user must ensure that the provided string is compatible with git's reference naming requirements"
     required: true
   working_directory_path:
     description: 'The path to where the Iron Bank repo should be cloned'
@@ -18,16 +18,16 @@ inputs:
     description: 'A GitLab personal access token (PAT) for the specified user who has access to the Iron Bank project - ensure that this is a GitHub repo or org secret so that it is not leaked in the logs: https://docs.gitlab.com/user/profile/personal_access_tokens/#create-a-personal-access-token https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions'
     required: true
   ironbank_username:
-    description: 'The GitLab username for the user who has access to the Iron Bank project and whose PAT is being supplied, e.g., amann'
+    description: 'The GitLab username for the user who has access to the Iron Bank project and whose PAT is being supplied'
     required: true
   ironbank_project_id:
-    description: 'The GitLab project id for your Iron Bank project, e.g., 5450: https://docs.gitlab.com/user/project/working_with_projects/#access-a-project-by-using-the-project-id'
+    description: 'The GitLab project id for your Iron Bank project: https://docs.gitlab.com/user/project/working_with_projects/#access-a-project-by-using-the-project-id'
     required: true
   ironbank_project_clone_url:
-    description: "The clone url for your Iron Bank project without the 'https' protocol in front, e.g., repo1.dso.mil/dsop/mitre/security-automation-framework/heimdall2.git"
+    description: "The clone url for your Iron Bank project without the 'https' protocol in front"
     required: true
   git_commit_author_name:
-    description: "The commit author's name for the update being pushed to Iron Bank, e.g., Automated Heimdall Release"
+    description: "The commit author's name for the update being pushed to Iron Bank"
     required: true
     default: 'Automated Release'
   git_commit_author_email:
@@ -48,10 +48,10 @@ inputs:
     required: true
 outputs:
   issue_id:
-    description: 'Id for the generated issue'
+    description: 'Id for the generated GitLab issue on Iron Bank'
     value: ${{ steps.issue.outputs.issue_id }}
   mr_id:
-    description: 'Id for the generated merge request'
+    description: 'Id for the generated GitLab merge request on Iron Bank'
     value: ${{ steps.mr.outputs.mr_id }}
 runs:
   using: 'composite'

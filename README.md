@@ -1,26 +1,127 @@
 # ironbank_release_action
 GitHub Action for automating releases on to [Iron Bank](https://p1.dso.mil/ironbank)
 
-TODO: Inputs, outputs, example, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
+TODO: header talking about closure concept, example, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
+
 ## Input and Output Arguments
 ### Input
-#### `command_string` (Required)
+#### `name` (Required)
 
-Command string to be executed by SAF CLI. The action will run `saf <command_string>`.
+The name of the application to be updated.  This string will be used in git branch names so ensure that the provided string is compatible with git's reference naming requirements such as by making sure there are no spaces or periods: https://git-scm.com/docs/git-check-ref-format.
 
-Example:
+No default value provided.
 
-* `convert asff2hdf -i asff-findings.json -o output-file-name.json`
-* More examples can be found at [SAF CLI Usage](https://github.com/mitre/saf#usage).
-* NOTE: This action does not support `view heimdall` or input file-type detection (i.e omission of the expected conversion type).
+Example: `MyApplication`
+
+#### `version` (Required)
+
+The semver version number of the application to be released.  This string will be normalized by converting periods to hyphens for use in git branch names but otherwise the user must ensure that the provided string is compatible with git's reference naming requirements.
+
+No default value provided.
+
+Example: `1.2.3`
+
+#### `working_directory_path` (Required)
+
+The path to where the Iron Bank repo should be cloned.
+
+Default value: `../tmp_ironbank_workspace`
+
+Example: `../my_application_ironbank`
+
+#### `ironbank_pat` (Required)
+
+A GitLab personal access token (PAT) for the specified user who has access to the Iron Bank project - ensure that this is a GitHub repo or org secret so that it is not leaked in the logs: https://docs.gitlab.com/user/profile/personal_access_tokens/#create-a-personal-access-token https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions.
+
+No default value provided.
+
+Example: `preface-random1234characters`
+
+#### `ironbank_username` (Required)
+
+The GitLab username for the user who has access to the Iron Bank project and whose PAT is being supplied.
+
+No default value provided.
+
+Example: `alastname`
+
+#### `ironbank_project_id` (Required)
+
+The GitLab project id for your Iron Bank project: https://docs.gitlab.com/user/project/working_with_projects/#access-a-project-by-using-the-project-id.
+
+No default value provided.
+
+Example: `12345`
+
+#### `ironbank_project_clone_url` (Required)
+
+The clone url for your Iron Bank project without the 'https' protocol in front.
+
+No default value provided.
+
+Example: `repo1.dso.mil/dsop/organization/suborganization/project.git`
+
+#### `git_commit_author_name` (Required)
+
+The commit author's name for the update being pushed to Iron Bank.
+
+Default value: `Automated Release`
+
+Example: `Automated Application Release`
+
+#### `git_commit_author_email` (Required)
+
+The commit author's email for the update being pushed to Iron Bank.
+
+No default value provided.
+
+Example: `foobar@example.com`
+
+#### `issue_labels` (Required)
+
+A comma separated list of labels that will be applied to the issue filed on Iron Bank.
+
+Default value: `Status::Review`
+
+Example: `Status::Review`
+
+#### `target_branch` (Not required)
+
+The branch that the merge request will be targetting; if no or an empty input is provided, then the target branch will be the repository's default branch.  `development` is usually the default branch on Iron Bank.
+
+No default value provided.
+
+Example: `development`
+
+#### `draft` (Not required)
+
+Whether or not to mark the merge request as a draft; if no or an empty input is provided, then the merge request will not be marked as a draft.
+
+No default value provided.
+
+Example: `false`
+
+#### `update_commands` (Required)
+
+The bash script that will be evaluated in order to update all appropriate values within the Iron Bank repo; WARNING: only allow trusted content to be placed here, see [Security Concerns](#security-concerns).
+
+No default value provided.
+
+Example: `date >> CHANGELOG`
 
 ### Output
 
-As determined by input command.
+#### `issue_id`
+
+Id for the generated GitLab issue on Iron Bank.
+
+#### `mr_id`
+
+Id for the generated GitLab merge request on Iron Bank.
 
 ## Secrets
 
-This action does not use any GitHub secrets.
+This action does not use any GitHub secrets. 
 
 ## Example
 
@@ -57,4 +158,4 @@ Please feel free to look through our issues, make a fork, and submit PRs and imp
 
 ### Issues and Support
 
-Please feel free to contact us by [opening an issue](https://github.com/mitre/saf_action/issues/new/choose) or emailing us at [saf@mitre.org](mailto:saf@mitre.org) should you have any suggestions, questions, or issues.  Please direct security concerns to [saf-security@mitre.org](mailto:saf-security@mitre.org).
+Please feel free to contact us by [opening an issue](https://github.com/mitre/ironbank_release_action/issues/new) or emailing us at [saf@mitre.org](mailto:saf@mitre.org) should you have any suggestions, questions, or issues.  Please direct security concerns to [saf-security@mitre.org](mailto:saf-security@mitre.org).
