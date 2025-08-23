@@ -1,7 +1,7 @@
 # ironbank_release_action
 GitHub Action for automating releases on to [Iron Bank](https://p1.dso.mil/ironbank)
 
-TODO: header talking about closure concept, header talking about build/push docker container somewhere as a necessary prior step, example, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs - unsure if still needed now that the ironbank certs have propagated a bit but maybe just add it as a reminder that it might be necessary to do?, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
+TODO: header talking about closure concept where we do all the prep and git stuff and push to ironbank so you just need to change the files themselves, header talking about build/push docker container somewhere as a necessary prior step, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs - unsure if still needed now that the ironbank certs have propagated a bit but maybe just add it as a reminder that it might be necessary to do?, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
 
 ## Input and Output Arguments
 ### Input
@@ -130,24 +130,62 @@ At minimum, the following variable should be treated as a secret and not used in
 Below is an example action.
 
 ```
-on: [push]
+name: Push Heimdall Server to Docker Hub on every release, tag as release-latest and version, and then upgrade the tag on Iron Bank
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'     
+        required: true
+
 jobs:
-  saf_hdf_conversion:
-    runs-on: ubuntu-latest
-    name: SAF CLI Convert ASFF to HDF
+  docker:
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Convert ASFF
-        uses: mitre/saf_action@v1
+      - name: Run string replace # remove the v from the version number before using it in the docker tag
+        uses: frabert/replace-string-action@v2
+        id: format-tag
         with:
-          command_string: 'convert asff2hdf -i asff_sample.json -o asff_sample_hdf.json'
-      - name: Artifacts
-        uses: actions/upload-artifact@v4
-        if: success()
+          pattern: 'v'
+          string: '${{ github.event.release.tag_name || github.event.inputs.version}}'
+          replace-with: ''
+          flags: 'g'
+      - name: Checkout the Heimdall Repository
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
         with:
-          name: asff
-          path: asff_sample_hdf.json
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: mitre/heimdall2:release-latest,mitre/heimdall2:${{ steps.format-tag.outputs.replaced }}
+      - name: Get Docker SHA
+        shell: bash
+        run: echo "DOCKER_SHA=$(docker pull mitre/heimdall2:${{ steps.format-tag.outputs.replaced }} > /dev/null 2>&1 && docker inspect --format='{{index .RepoDigests 0}}' mitre/heimdall2:${{ steps.format-tag.outputs.replaced }} | cut -d '@' -f 2)" >> $GITHUB_ENV
+      - name: Upgrade tag on Iron Bank
+        uses: mitre/ironbank_release_action@v1
+        with:
+          name: "Heimdall"
+          version: ${{ steps.format-tag.outputs.replaced }}
+          ironbank_pat: ${{ secrets.IRONBANK_PAT }}
+          ironbank_username: ${{ secrets.IRONBANK_USERNAME }}
+          ironbank_project_id: 5450
+          ironbank_project_clone_url: repo1.dso.mil/dsop/mitre/security-automation-framework/heimdall2.git
+          git_commit_author_name: "Automated Heimdall Release"
+          git_commit_author_email: "saf@mitre.org"
+          update_commands: |
+            yq e -i '.args.HEIMDALL_VERSION=${{ steps.format-tag.outputs.replaced }} | .tags[0]=${{ steps.format-tag.outputs.replaced }} | .labels."org.opencontainers.image.version"=${{ steps.format-tag.outputs.replaced }} | .resources[1].tag=mitre/heimdall2:${{ steps.format-tag.outputs.replaced }} | .resources[1].url=docker://docker.io/mitre/heimdall2@${{ env.DOCKER_SHA }}' hardening_manifest.yaml
+            sed -i s/HEIMDALL_VERSION=\.\*/HEIMDALL_VERSION=${{ steps.format-tag.outputs.replaced }}/ Dockerfile
 ```
 
 For more examples, check out these workflows: [SAF CLI release]() and [SAF CLI mainline]().
