@@ -120,10 +120,6 @@ runs:
         git add .
         git diff --staged
         git -c "user.name=${{ inputs.git_commit_author_name }}" -c "user.email=${{ inputs.git_commit_author_email }}" commit -s -m "Updating ${{ inputs.name }} to ${{ inputs.version }}"
-    - name: Create branch
-      shell: bash
-      working-directory: ${{ inputs.working_directory_path }}
-      run: git switch -c "${{ env.version_hyphenated }}"
     - name: Create issue
       id: issue
       shell: bash
