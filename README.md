@@ -1,7 +1,11 @@
 # ironbank_release_action
 GitHub Action for automating releases on to [Iron Bank](https://p1.dso.mil/ironbank)
 
-TODO: header talking about closure concept where we do all the prep and git stuff and push to ironbank so you just need to change the files themselves, header talking about build/push docker container somewhere as a necessary prior step, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs - unsure if still needed now that the ironbank certs have propagated a bit but maybe just add it as a reminder that it might be necessary to do?, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
+The purpose of this action is to automate the routine changes required in an Iron Bank repository when you upgrade your application, which primarily involves going in and changing the version numbers of your application within the Dockerfile and hardening_manifest.yaml files.  Using this action lets you easily scale up a previously manual process to one that can handle all of your Iron Bank repositories for your applications and their various release types (multiple supported versions, different architectures, release vs latest, etc).
+
+The manner in which this action works is to take your specific sequence of update steps which you supply in the `update_commands` parameter, and wrap them with all of the git and Iron Bank specific actions to get those changes pushed over to Iron Bank.  Conceptually, this action can be thought of as a "decorator" for the "function" consisting of your update commands where all you need to supply are the file manipulations needed to update the version strings in your Iron Bank repo and the action handles the rest.
+
+TODO: header talking about build/push docker container somewhere as a necessary prior step, header talking about still having to do all the iron bank stuff including going in afterwards to confirm that the pipeline went through and addressing all of the VAT stuff, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs - unsure if still needed now that the ironbank certs have propagated a bit but maybe just add it as a reminder that it might be necessary to do?, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
 
 ## Input and Output Arguments
 ### Input
