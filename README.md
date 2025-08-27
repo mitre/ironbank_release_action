@@ -5,7 +5,23 @@ The purpose of this action is to automate the routine changes required in an Iro
 
 The manner in which this action works is to take your specific sequence of update steps which you supply in the `update_commands` parameter, and wrap them with all of the git and Iron Bank specific actions to get those changes pushed over to Iron Bank.  Conceptually, this action can be thought of as a "decorator" for the "function" consisting of your update commands where all you need to supply are the file manipulations needed to update the version strings in your Iron Bank repo and the action handles the rest.
 
-TODO: header talking about build/push docker container somewhere as a necessary prior step, header talking about still having to do all the iron bank stuff including going in afterwards to confirm that the pipeline went through and addressing all of the VAT stuff, security warnings (codeowners advice, you can run arbitrary so make sure it's vetted), CA certs - unsure if still needed now that the ironbank certs have propagated a bit but maybe just add it as a reminder that it might be necessary to do?, and required software on the runner (bash, echo, sed, git, mkdir, curl, jq, and whatever they'll need for their update phase)
+## Pre- and postrequisites
+
+In the general case, you will likely be building and pushing up a Docker container to a public registry which contains the latest version of your application.  You will then be referencing that build artifact in your hardening_manifest so that the Iron Bank pipelines know what to pull down on your behalf before you can reference that artifact over there.  Consequently, we recommend following a similar approach to the example below where you build and push the container and then grab the SHA that is generated, which you can then feed into your update commands.
+
+Another consideration will be ensuring that your runner has all of the certificates and software it needs for the action to work properly.  Please ensure that your runner has the CA certificates required to communicate with https://repo1.dso.mil - usually the base set of certificates on the GitHub provided runners are fine, but occasionally Iron Bank upgrades their certificate which requires you to manually add it to your runner until such time that that certificate is propagated.  Please ensure that your runner has the following software installed on top of whatever you will need to do your update commands (ex. our example below uses `yq`):
+  * `bash`
+  * `curl`
+  * `echo`
+  * `eval`
+  * `git`
+  * `jq`
+  * `mkdir`
+  * `sed`
+
+Once this action has run and attempted to create an issue and merge request on your behalf, it is your responsibility to confirm that it succeeded, to ensure that the resultant Iron Bank pipeline run went through properly, to address any comments or feedback provided by the Iron Bank engineers and reviewers, and to provide any justifications on the generated VAT as necessary.
+
+TODO: security warnings (codeowners advice, you can run arbitrary so make sure it's vetted)
 
 ## Input and Output Arguments
 ### Input
