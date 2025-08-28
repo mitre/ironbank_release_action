@@ -1,5 +1,5 @@
 name: 'Release to Iron Bank'
-description: 'Automatically generate an issue and merge request containing version update changes against an Iron Bank repository hosted on repo1.dso.mil'
+description: 'Automatically generate an issue + merge request containing specified changes against an Iron Bank repository (repo1.dso.mil)'
 branding:
   icon: 'git-pull-request'
   color: 'gray-dark'
