@@ -23,7 +23,7 @@ Once this action has run and attempted to create an issue and merge request on y
 
 ## Security Concerns
 
-Since this action allows you to supply arbitrary commands and also requires exposing a Personal Access Token (PAT) for a repository, you need to take appropriate action to reduce risk.  At minimum, we recommend ensuring that only thoroughly vetted and tested code written by trusted authors is allowed to be placed in the `update_commands` input.
+Since this action allows you to supply arbitrary commands and also requires exposing a Personal Access Token (PAT) for a repository, you need to take appropriate action to reduce risk.  At minimum, we recommend 1) ensuring that only thoroughly vetted and tested code written by trusted authors is allowed to be placed in the `update_commands` input and 2) both the Iron Bank PAT and the GITHUB_TOKEN are scoped to the least required set of privileges. 
 
 ## Input and Output Arguments
 ### Input
@@ -162,6 +162,9 @@ on:
       version:
         description: 'Version'     
         required: true
+
+permissions:
+  contents: read
 
 jobs:
   docker:
