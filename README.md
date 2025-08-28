@@ -209,7 +209,7 @@ jobs:
           git_commit_author_name: "Automated Heimdall Release"
           git_commit_author_email: "saf@mitre.org"
           update_commands: |
-            yq e -i '.args.HEIMDALL_VERSION=\"${{ steps.format-tag.outputs.replaced }}\" | .tags[0]=\"${{ steps.format-tag.outputs.replaced }}\" | .labels."org.opencontainers.image.version"=\"${{ steps.format-tag.outputs.replaced }}\" | .resources[1].tag=\"mitre/heimdall2:${{ steps.format-tag.outputs.replaced }}\" | .resources[1].url=\"docker://docker.io/mitre/heimdall2@${{ env.DOCKER_SHA }}\"' hardening_manifest.yaml
+            yq e -i '.args.HEIMDALL_VERSION=\"${{ steps.format-tag.outputs.replaced }}\" | .tags[0]=\"${{ steps.format-tag.outputs.replaced }}\" | .labels.\"org.opencontainers.image.version\"=\"${{ steps.format-tag.outputs.replaced }}\" | .resources[1].tag=\"mitre/heimdall2:${{ steps.format-tag.outputs.replaced }}\" | .resources[1].url=\"docker://docker.io/mitre/heimdall2@${{ env.DOCKER_SHA }}\"' hardening_manifest.yaml
             sed -i s/HEIMDALL_VERSION=\.\*/HEIMDALL_VERSION=${{ steps.format-tag.outputs.replaced }}/ Dockerfile
 ```
 
