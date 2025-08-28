@@ -131,12 +131,12 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working_directory_path }}
       run: |
-        git check-ref-format --branch "${{ steps.issue.outputs.issue_id}}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
-        git push 'https://${{ inputs.ironbank_username }}:{{ inputs.ironbank_pat}}@${{ inputs.ironbank_project_clone_url }}' "${{ env.version_hyphenated }}":"${{ steps.issue.outputs.issue_id}}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
+        git check-ref-format --branch "${{ steps.issue.outputs.issue_id }}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
+        git push 'https://${{ inputs.ironbank_username }}:{{ inputs.ironbank_pat }}@${{ inputs.ironbank_project_clone_url }}' "${{ env.version_hyphenated }}":"${{ steps.issue.outputs.issue_id }}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
     - name: Create merge request
       id: mr
       shell: bash
       working-directory: ${{ inputs.working_directory_path }}
       run: |
-        mr=$(curl -X POST --header "PRIVATE-TOKEN: ${{ inputs.ironbank_pat }}" --header "Content-Type: application/json" --data '{"allow_collaboration": true, "squash": true, "remove_source_branch": true, "source_branch": "${{ steps.issue.outputs.issue_id}}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}", "target_branch": "${{ env.target_branch }}", "title": "${{ env.draft_status  }}Resolve \"Update ${{ inputs.name }} to ${{ inputs.version }}\"", "description": "Related to #${{ steps.issue.outputs.issue_id }}"}' "https://repo1.dso.mil/api/v4/projects/${{ inputs.ironbank_project_id }}/merge_requests" | jq ".iid")
+        mr=$(curl -X POST --header "PRIVATE-TOKEN: ${{ inputs.ironbank_pat }}" --header "Content-Type: application/json" --data '{"allow_collaboration": true, "squash": true, "remove_source_branch": true, "source_branch": "${{ steps.issue.outputs.issue_id }}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}", "target_branch": "${{ env.target_branch }}", "title": "${{ env.draft_status }}Resolve \"Update ${{ inputs.name }} to ${{ inputs.version }}\"", "description": "Related to #${{ steps.issue.outputs.issue_id }}"}' "https://repo1.dso.mil/api/v4/projects/${{ inputs.ironbank_project_id }}/merge_requests" | jq ".iid")
         echo "mr_id=$mr" >> $GITHUB_OUTPUT
