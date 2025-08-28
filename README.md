@@ -117,7 +117,7 @@ Example: `development`
 
 #### `draft` (Not required)
 
-Whether or not to mark the merge request as a draft; if no or an empty input is provided, then the merge request will not be marked as a draft.
+Whether or not to mark the merge request as a draft; if "true", then the merge request will be marked as a draft.
 
 No default value provided.
 

@@ -41,7 +41,7 @@ inputs:
     description: "The branch that the merge request will be targetting; if no or an empty input is provided, then the target branch will be the repository's default branch.  `development` is usually the default branch on Iron Bank"
     required: false
   draft:
-    description: 'Whether or not to mark the merge request as a draft; if no or an empty input is provided, then the merge request will not be marked as a draft'
+    description: 'Whether or not to mark the merge request as a draft; if "true", then the merge request will be marked as a draft'
     required: false
   update_commands:
     description: 'The bash script that will be evaluated in order to update all appropriate values within the Iron Bank repo; WARNING: only allow trusted content to be placed here, see the security concerns section of the README'
@@ -80,7 +80,7 @@ runs:
       id: draft
       shell: bash
       run: |
-        if [[ "${{ inputs.draft }}" ]]; then
+        if [[ "${{ inputs.draft }}" == "true" ]]; then
           echo "draft_status='Draft: '" >> $GITHUB_ENV
         else
           echo "draft_status=''" >> $GITHUB_ENV
