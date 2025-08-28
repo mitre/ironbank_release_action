@@ -21,7 +21,9 @@ Another consideration will be ensuring that your runner has all of the certifica
 
 Once this action has run and attempted to create an issue and merge request on your behalf, it is your responsibility to confirm that it succeeded, to ensure that the resultant Iron Bank pipeline run went through properly, to address any comments or feedback provided by the Iron Bank engineers and reviewers, and to provide any justifications on the generated VAT as necessary.
 
-TODO: security warnings (codeowners advice, you can run arbitrary so make sure it's vetted)
+## Security Concerns
+
+Since this action allows you to supply arbitrary commands and also requires exposing a Personal Access Token (PAT) for a repository, you need to take appropriate action to reduce risk.  At minimum, we recommend ensuring that only thoroughly vetted and tested code written by trusted authors is allowed to be placed in the `update_commands` input.
 
 ## Input and Output Arguments
 ### Input
