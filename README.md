@@ -168,9 +168,9 @@ permissions:
 
 jobs:
   docker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-      - name: Run string replace # remove the v from the version number before using it in the docker tag
+      - name: Run string replace to remove the v from the version number before using it in the docker tag
         uses: frabert/replace-string-action@v2
         id: format-tag
         with:
@@ -187,17 +187,17 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push
+      - name: Build and push the container image to DockerHub
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           platforms: linux/amd64
           tags: mitre/heimdall2:release-latest,mitre/heimdall2:${{ steps.format-tag.outputs.replaced }}
-      - name: Get Docker SHA
+      - name: Get Docker SHA since the Iron Bank release requires us to specify the exact resources we need them to pull into the environment
         shell: bash
         run: echo "DOCKER_SHA=$(docker pull mitre/heimdall2:${{ steps.format-tag.outputs.replaced }} > /dev/null 2>&1 && docker inspect --format='{{index .RepoDigests 0}}' mitre/heimdall2:${{ steps.format-tag.outputs.replaced }} | cut -d '@' -f 2)" >> $GITHUB_ENV
-      - name: Upgrade tag on Iron Bank
+      - name: Upgrade Iron Bank
         uses: mitre/ironbank_release_action@v1
         with:
           name: "Heimdall"
@@ -213,7 +213,7 @@ jobs:
             sed -i s/HEIMDALL_VERSION=\.\*/HEIMDALL_VERSION=${{ steps.format-tag.outputs.replaced }}/ Dockerfile
 ```
 
-For more examples, check out these workflows: [SAF CLI release]() and [SAF CLI mainline]().
+For more examples, check out these workflows: [SAF CLI release](https://github.com/mitre/saf/blob/46dd3d174b1e9987480dad1369c143b9b965a859/.github/workflows/push-to-docker.yml) and [SAF CLI mainline](https://github.com/mitre/saf/blob/46dd3d174b1e9987480dad1369c143b9b965a859/.github/workflows/push-to-docker-main.yml).
 
 ## Contributing, Issues and Support
 
