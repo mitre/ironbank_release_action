@@ -24,7 +24,7 @@ inputs:
     description: 'The GitLab project id for your Iron Bank project: https://docs.gitlab.com/user/project/working_with_projects/#access-a-project-by-using-the-project-id'
     required: true
   ironbank_project_clone_url:
-    description: "The clone url for your Iron Bank project without the 'https' protocol in front"
+    description: "The clone url for your Iron Bank project without the 'https://' in front"
     required: true
   git_commit_author_name:
     description: "The commit author's name for the update being pushed to Iron Bank"

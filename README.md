@@ -77,7 +77,7 @@ Example: `12345`
 
 #### `ironbank_project_clone_url` (Required)
 
-The clone url for your Iron Bank project without the 'https' protocol in front.
+The clone url for your Iron Bank project without the 'https://' in front.
 
 No default value provided.
 
