@@ -131,7 +131,7 @@ runs:
       working-directory: ${{ inputs.working_directory_path }}
       run: |
         git check-ref-format --branch "${{ steps.issue.outputs.issue_id }}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
-        git push 'https://${{ inputs.ironbank_username }}:{{ inputs.ironbank_pat }}@${{ inputs.ironbank_project_clone_url }}' "${{ env.version_hyphenated }}":"${{ steps.issue.outputs.issue_id }}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
+        git push 'https://${{ inputs.ironbank_username }}:${{ inputs.ironbank_pat }}@${{ inputs.ironbank_project_clone_url }}' "${{ env.version_hyphenated }}":"${{ steps.issue.outputs.issue_id }}-update-${{ inputs.name }}-to-${{ env.version_hyphenated }}"
     - name: Create merge request
       id: mr
       shell: bash
