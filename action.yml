@@ -38,7 +38,7 @@ inputs:
     required: true
     default: 'Status::Review'
   target_branch:
-    description: "The branch that the merge request will be targetting, e.g., 'development', which is usually the default branch on Iron Bank; if no or an empty input is provided, then the target branch will be the repository's default branch"
+    description: "The branch that the merge request will be targetting; if no or an empty input is provided, then the target branch will be the repository's default branch.  `development` is usually the default branch on Iron Bank"
     required: false
   draft:
     description: 'Whether or not to mark the merge request as a draft; if no or an empty input is provided, then the merge request will not be marked as a draft'
