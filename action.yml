@@ -68,7 +68,6 @@ runs:
         [[ "${{ inputs.ironbank_project_clone_url }}" ]] || { echo '"ironbank_project_clone_url" input is empty'; exit 1; }
         [[ "${{ inputs.git_commit_author_name }}" ]] || { echo '"git_commit_author_name" input is empty'; exit 1; }
         [[ "${{ inputs.git_commit_author_email }}" ]] || { echo '"git_commit_author_email" input is empty'; exit 1; }
-        [[ "${{ inputs.issue_labels }}" ]] || { echo '"issue_labels" input is empty'; exit 1; }
         [[ "${{ inputs.update_commands }}" ]] || { echo '"update_commands" input is empty'; exit 1; }
     - name: Convert periods to hyphens in version string for use in areas like generating the branch name
       shell: bash
