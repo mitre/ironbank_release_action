@@ -80,7 +80,7 @@ runs:
       shell: bash
       run: |
         if [[ "${{ inputs.draft }}" == "true" ]]; then
-          echo "draft_status='Draft: '" >> $GITHUB_ENV
+          echo "draft_status=Draft: " >> $GITHUB_ENV
         else
           echo "draft_status=''" >> $GITHUB_ENV
         fi
